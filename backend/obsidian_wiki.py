@@ -25,11 +25,24 @@ class ObsidianWiki:
         text = re.sub(r'[<>:"/\\|?*]', '', text)
         return text.strip()
     
+    def _slugify_title(self, title: str) -> str:
+        """Convert title to filename-safe slug."""
+        # Remove special chars, keep spaces for readability in title
+        slug = re.sub(r'[<>:"/\\|?*]', '', title)
+        # Limit length
+        return slug[:80].strip()
+    
     def create_summary_page(self, item: dict) -> str:
-        """Create a summary page for processed content."""
+        """Create a summary page for processed content with descriptive title."""
         source = item['source']
         source_id = item['id']
-        filename = f"{source}-{source_id}.md"
+        title = item.get('title', 'Untitled')
+        
+        # Use descriptive title for filename (NOT twitter-12345)
+        filename_base = self._slugify_title(title)
+        if not filename_base:
+            filename_base = f"{source}-{source_id}"
+        filename = f"{filename_base}.md"
         filepath = self.wiki_path / "summaries" / filename
         
         # Extract entities and concepts for linking
@@ -40,13 +53,13 @@ class ObsidianWiki:
         entity_links = " ".join([f"[[{e if isinstance(e, str) else e.get('name', 'Unknown')}]]" for e in entities]) if entities else "None"
         concept_links = " ".join([f"[[{c}]]" for c in concepts]) if concepts else "None"
         
-        # Format key points as bullet list
-        key_points = item.get('key_points', '')
-        if key_points and not key_points.startswith('-'):
-            key_points = '\n'.join([f"- {point.strip()}" for point in key_points.split('\n') if point.strip()])
+        # Truncate original text (don't store full transcript)
+        original = item.get('original_text', '')
+        if len(original) > 300:
+            original = original[:300] + "... [truncated]"
         
         content = f"""---
-title: {item.get('title', 'Untitled')[:50]}
+title: {title[:80]}
 type: summary
 source: {source}
 source_id: "{source_id}"
@@ -59,22 +72,18 @@ entities: {json.dumps([e if isinstance(e, str) else e.get('name') for e in entit
 concepts: {json.dumps(concepts)}
 ---
 
-# {item.get('title', 'Untitled')[:60]}
+# {title[:80]}
 
 **Source:** {source} | **Author:** {item.get('author', 'unknown')}
 **Date:** {item.get('date', 'unknown')} | **Ingested:** {datetime.now().strftime('%Y-%m-%d')}
 
-## Original Content
-
-{item.get('original_text', '')}
-
-## Summary
+## Insight
 
 {item.get('summary', 'No summary available.')}
 
-## Key Points
+## Source
 
-{key_points or '- No key points extracted'}
+{item.get('original_text', '')}
 
 ## Entities
 
@@ -207,6 +216,12 @@ tags: [entity]
             temp_path.replace(filepath)
             
         else:
+            # Create concept page with initial content from source
+            overview = f"**What is {concept_name}?**\n\n"
+            if snippet:
+                overview += f"Based on: {snippet[:200]}{'...' if len(snippet) > 200 else ''}\n\n"
+            overview += f"*{concept_name} is a topic mentioned in curated content. This page aggregates knowledge about it over time.*"
+            
             content = f"""---
 title: "{concept_name}"
 type: concept
@@ -219,14 +234,18 @@ related_concepts: []
 # {concept_name}
 
 ## Overview
-<!-- AI-generated synthesis will appear here -->
+
+{overview}
+
+## Key Principles
+<!-- Will be populated as more sources mention this concept -->
 
 ## Sources
 
-- [[{source_ref}]] ({source_date}): {snippet[:100]}{'...' if len(snippet) > 100 else ''}
+- [[{source_ref}]] ({source_date}): {snippet[:150]}{'...' if len(snippet) > 150 else ''}
 
 ## Related Concepts
-<!-- Auto-populated -->
+<!-- Auto-populated as connections emerge -->
 
 ## Related Entities
 <!-- Auto-populated -->

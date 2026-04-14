@@ -49,15 +49,25 @@ class ContentItem(Base):
     def to_wiki_dict(self):
         """Convert to dict for wiki ingestion."""
         import json
+        
+        # Use stored title (from AI) or generate from insight
+        if self.key_points and len(self.key_points) < 100:
+            # key_points stores the title for high-value items
+            title = self.key_points
+        elif self.ai_insight:
+            title = self.ai_insight.split('\n')[0][:60] if '\n' in self.ai_insight else self.ai_insight[:60]
+        else:
+            title = 'Untitled'
+        
         return {
             'id': self.source_id,
             'source': self.source,
-            'title': self.ai_insight[:60] if self.ai_insight else (self.caption[:60] if self.caption else 'Untitled'),
-            'author': self.creator_info if hasattr(self, 'creator_info') else self.creator_username,
+            'title': title,
+            'author': self.creator_username or 'unknown',
             'date': self.timestamp.strftime('%Y-%m-%d') if self.timestamp else datetime.now().strftime('%Y-%m-%d'),
             'original_text': self.caption or '',
             'summary': self.ai_insight or '',
-            'key_points': self.key_points or '',
+            'key_points': '',  # Now stored in summary
             'entities': json.loads(self.entities_json) if self.entities_json else [],
             'concepts': json.loads(self.concepts_json) if self.concepts_json else [],
             'tags': [self.category] if self.category else [],

@@ -158,21 +158,39 @@ def ai_process_command(limit=10):
         for item in items:
             print(f"\n   Processing: {item.source_id}")
             
-            # Extract entities and concepts with Groq
-            prompt = f"""Analyze this tweet and extract entities and concepts.
+            # Extract value with strict relevance criteria
+            prompt = f"""Analyze this content for KNOWLEDGE VALUE. Be extremely critical.
 
-Tweet: {item.caption or ''}
-Author: {item.creator_username or 'unknown'}
+Content: {item.caption or ''}
+Source: {item.source}
+
+REJECT and mark low relevance (1-3) if:
+- Just vanity metrics (likes, stars, views, followers)
+- Pure news without analysis or insight
+- Entertainment/memes with no learning value
+- Generic motivational content
+- Surface-level observations
+
+ACCEPT and extract ONLY if:
+- Teaches a concept, framework, or mental model
+- Provides actionable advice or strategies
+- Changes how to think about a topic
+- Contains specific, reference-able insights
+- Explains WHY or HOW something works
 
 Return JSON:
 {{
-  "entities": [{{"name": "...", "type": "person|company|book|tool"}}],
-  "concepts": ["topic1", "topic2"],
-  "summary": "2-3 sentence summary",
-  "key_points": "bullet points",
-  "relevance_score": 1-10,
-  "category": "finance|tech|business|other"
-}}"""
+  "title": "3-7 word descriptive title about the core insight (NOT about virality)",
+  "core_message": "One sentence: what is this actually about?",
+  "key_insight": "What did you learn? Be specific. No fluff.",
+  "actionable": "What should the reader DO with this info?",
+  "entities": [{{"name": "significant person/company/tool only", "type": "person|company|book|tool"}}],
+  "concepts": ["specific topics/frameworks worth researching"],
+  "relevance_score": 1-10 (be harsh: 7+ only if truly valuable),
+  "category": "finance|strategy|productivity|tech|psychology|other"
+}}
+
+Remember: The user curates for QUALITY, not quantity. Be selective."""
             
             headers = {
                 'Authorization': f'Bearer {groq_key}',
@@ -197,24 +215,39 @@ Return JSON:
                     result = resp.json()['choices'][0]['message']['content']
                     data = json.loads(result)
                     
-                    # Update item
+                    # Skip low-relevance content (user wants 7+ only)
+                    relevance = data.get('relevance_score', 5)
+                    if relevance < 7:
+                        print(f"   ⏩ SKIPPED: Low relevance ({relevance}/10)")
+                        item.ai_processed = True  # Mark as processed to skip
+                        item.relevance_score = relevance
+                        continue
+                    
+                    # Update item with high-quality extraction
                     item.entities_json = json.dumps(data.get('entities', []))
                     item.concepts_json = json.dumps(data.get('concepts', []))
-                    item.ai_insight = data.get('summary', '')
                     
-                    # Convert key_points to string (handle both list and string)
-                    key_points = data.get('key_points', '')
-                    if isinstance(key_points, list):
-                        item.key_points = json.dumps(key_points)
-                    else:
-                        item.key_points = key_points
+                    # Store title for wiki naming
+                    title = data.get('title', 'Untitled')
                     
-                    item.relevance_score = data.get('relevance_score', 5)
+                    # Build rich insight from structured fields
+                    insight_parts = [
+                        f"**Core Message**: {data.get('core_message', '')}",
+                        f"**Key Insight**: {data.get('key_insight', '')}",
+                        f"**Actionable**: {data.get('actionable', '')}"
+                    ]
+                    item.ai_insight = "\n\n".join(insight_parts)
+                    
+                    # Store title in key_points temporarily for wiki naming
+                    item.key_points = title
+                    
+                    item.relevance_score = relevance
                     item.category = data.get('category', 'other')
                     item.ai_processed = True
                     
                     processed_count += 1
-                    print(f"   ✅ Extracted {len(data.get('entities', []))} entities, {len(data.get('concepts', []))} concepts")
+                    print(f"   ✅ High value ({relevance}/10): {title[:50]}...")
+                    print(f"      Entities: {len(data.get('entities', []))}, Concepts: {len(data.get('concepts', []))}")
                 else:
                     print(f"   ❌ Groq API error: {resp.status_code}")
                     
