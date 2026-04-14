@@ -36,9 +36,33 @@ class ContentItem(Base):
     relevance_score = Column(Integer, nullable=True)
     key_points = Column(Text, nullable=True)
     
+    # Obsidian Sync Tracking
+    obsidian_synced = Column(Boolean, default=False)
+    obsidian_path = Column(String(512), nullable=True)
+    entities_json = Column(Text, nullable=True)  # JSON string of extracted entities
+    concepts_json = Column(Text, nullable=True)  # JSON string of extracted concepts
+    
     # Meta tracking
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_wiki_dict(self):
+        """Convert to dict for wiki ingestion."""
+        import json
+        return {
+            'id': self.source_id,
+            'source': self.source,
+            'title': self.ai_insight[:60] if self.ai_insight else (self.caption[:60] if self.caption else 'Untitled'),
+            'author': self.creator_info if hasattr(self, 'creator_info') else self.creator_username,
+            'date': self.timestamp.strftime('%Y-%m-%d') if self.timestamp else datetime.now().strftime('%Y-%m-%d'),
+            'original_text': self.caption or '',
+            'summary': self.ai_insight or '',
+            'key_points': self.key_points or '',
+            'entities': json.loads(self.entities_json) if self.entities_json else [],
+            'concepts': json.loads(self.concepts_json) if self.concepts_json else [],
+            'tags': [self.category] if self.category else [],
+            'relevance_score': self.relevance_score or 5,
+        }
 
 class APICostLog(Base):
     """
