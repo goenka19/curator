@@ -11,10 +11,10 @@
             "id": "d02737fb43eade4b",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "graph",
               "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -74,8 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "4fea172c53c358f9",
@@ -179,13 +178,16 @@
   },
   "active": "d02737fb43eade4b",
   "lastOpenFiles": [
+    "raw-sources/x-articles",
+    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media/DWjdnxMCpcL_frames/frame_0035.jpg\", 35.0.md",
+    "wiki/concepts/Code Generation.md",
+    "Untitled",
     "Welcome.md",
     "2026-04-14.md",
     "wiki/summaries/twitter-2043374229199151351.md",
     "wiki/summaries/instagram-instagram_DVQmxeAEgWh.md",
     "wiki/concepts/GitHub stars.md",
     "Finance.md",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media/DWjdnxMCpcL_frames/frame_0035.jpg\", 35.0.md",
     "wiki/summaries/instagram-instagram_DWjdnxMCpcL.md",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media/DWjdnxMCpcL_frames",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media",
@@ -196,7 +198,6 @@
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames",
     "wiki/concepts/Coding patterns.md",
     "wiki/entities/CLAUD.md.md",
     "Apollo Global.md",

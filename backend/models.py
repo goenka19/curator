@@ -42,6 +42,11 @@ class ContentItem(Base):
     entities_json = Column(Text, nullable=True)  # JSON string of extracted entities
     concepts_json = Column(Text, nullable=True)  # JSON string of extracted concepts
     
+    # URL Tracking
+    has_x_article = Column(Boolean, default=False)
+    x_article_url = Column(String(512), nullable=True)
+    external_url = Column(String(512), nullable=True)
+    
     # Meta tracking
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -72,6 +77,9 @@ class ContentItem(Base):
             'concepts': json.loads(self.concepts_json) if self.concepts_json else [],
             'tags': [self.category] if self.category else [],
             'relevance_score': self.relevance_score or 5,
+            'has_x_article': self.has_x_article or False,
+            'x_article_url': self.x_article_url,
+            'external_url': self.external_url,
         }
 
 class APICostLog(Base):

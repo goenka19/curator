@@ -38,8 +38,15 @@ class ObsidianWiki:
         source_id = item['id']
         title = item.get('title', 'Untitled')
         
+        # Check if this is an X Article that needs manual extraction
+        has_x_article = item.get('has_x_article', False)
+        x_article_url = item.get('x_article_url')
+        
         # Use descriptive title for filename (NOT twitter-12345)
-        filename_base = self._slugify_title(title)
+        if has_x_article and x_article_url:
+            filename_base = "x-article-needs-extraction"
+        else:
+            filename_base = self._slugify_title(title)
         if not filename_base:
             filename_base = f"{source}-{source_id}"
         filename = f"{filename_base}.md"
@@ -58,7 +65,57 @@ class ObsidianWiki:
         if len(original) > 300:
             original = original[:300] + "... [truncated]"
         
-        content = f"""---
+        # Special handling for X Articles
+        if has_x_article and x_article_url:
+            content = f"""---
+title: X Article - Requires Manual Extraction
+type: summary
+source: {source}
+source_id: "{source_id}"
+author: "{item.get('author', 'unknown')}"
+date: "{item.get('date', datetime.now().strftime('%Y-%m-%d'))}"
+ingested: "{datetime.now().strftime('%Y-%m-%d')}"
+tags: ["x-article", "needs-extraction"]
+relevance: {item.get('relevance_score', 5)}
+entities: {json.dumps([e if isinstance(e, str) else e.get('name') for e in entities])}
+concepts: {json.dumps(concepts)}
+---
+
+# X Article - Requires Manual Extraction
+
+**Source:** {source} | **Author:** {item.get('author', 'unknown')}
+**Date:** {item.get('date', 'unknown')} | **Ingested:** {datetime.now().strftime('%Y-%m-%d')}
+
+## ⚠️ Manual Extraction Required
+
+This tweet contains an X Article that cannot be fetched automatically.
+
+**X Article URL:** {x_article_url}
+
+## Action Required
+
+1. Visit the URL above
+2. Read the article
+3. Copy important insights to: `raw-sources/x-articles/{source_id}.md`
+4. Run `python backend/cli.py wiki-ingest` to process
+
+## Tweet Context
+
+{original}
+
+## Entities
+
+{entity_links}
+
+## Concepts
+
+{concept_links}
+
+## Related
+<!-- Auto-populated by cross-reference -->
+"""
+        else:
+            content = f"""---
 title: {title[:80]}
 type: summary
 source: {source}
@@ -83,7 +140,7 @@ concepts: {json.dumps(concepts)}
 
 ## Source
 
-{item.get('original_text', '')}
+{original}
 
 ## Entities
 

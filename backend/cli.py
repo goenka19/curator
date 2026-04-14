@@ -158,6 +158,18 @@ def ai_process_command(limit=10):
         for item in items:
             print(f"\n   Processing: {item.source_id}")
             
+            # Special handling for X Articles - skip AI, mark for manual extraction
+            if item.has_x_article:
+                print(f"   📄 X Article detected - skipping AI, marking for manual extraction")
+                item.ai_processed = True
+                item.ai_insight = f"**X Article**: Requires manual extraction from {item.x_article_url}"
+                item.relevance_score = 7  # Default to pass filter
+                item.category = "x-article"
+                item.entities_json = "[]"
+                item.concepts_json = "[]"
+                processed_count += 1
+                continue
+            
             # Extract value with strict relevance criteria
             prompt = f"""Analyze this content for KNOWLEDGE VALUE. Be extremely critical.
 
