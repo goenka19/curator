@@ -1,0 +1,62 @@
+# =============================================================================
+# .claudeignore - Files Claude should NEVER modify
+# =============================================================================
+# This file protects critical files from accidental modification by Claude Code
+# Only the user should modify these files with explicit intent
+# =============================================================================
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Database Files
+curator.db
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Database Backups
+backups/
+backups/*.db
+data/production/*
+
+# Database Migrations (generated)
+backend/alembic/versions/*
+
+# Configuration Files (project rules)
+.gitignore
+.claudeignore
+PROJECT.md
+CONSTRAINTS.md
+DEVELOPMENT.md
+
+# Lock Files (managed by package managers)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+Pipfile.lock
+
+# Build Artifacts
+build/
+dist/
+out/
+.next/
+__pycache__/
+
+# Logs (data files)
+logs/
+*.log
+
+# User Data
+data/*.json
+data/*.csv
+exports/
+
+# System Files
+.DS_Store
+Thumbs.db

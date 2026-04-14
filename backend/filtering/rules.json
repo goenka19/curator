@@ -1,0 +1,18 @@
+{
+  "whitelist": {
+    "keywords": ["finance", "business", "economics", "coding", "ai", "private credit", "game theory", "building", "creating", "statistics", "book recommendation", "website", "tool", "expected value", "decision making", "risk management", "probability", "lesson learned", "insight", "must read", "strategy", "advice", "reading list", "newsletter", "article", "blog post", "substack", "medium", "company", "earnings", "market", "stock", "startup", "founder", "valuation", "inflation", "fed", "report"],
+    "fuzzy_matching": true
+  },
+  "blacklist": {
+    "keywords": ["nba", "basketball", "football", "movie", "music", "meme", "funny", "lol", "relatable", "tag a friend", "wait for it", "soccer", "nfl", "uefa", "lebron", "curry", "cinema", "netflix", "hollywood", "pop", "rap", "lyrics", "poker tournament", "wsop", "all-in", "river card", "pocket aces", "big blind", "small blind", "flop turn", "lakers", "celtics", "warriors", "bulls", "heat", "nets", "bucks", "mavs", "mavericks", "knicks", "spurs", "clippers", "playoff game", "trade deadline", "dunk", "three pointer"],
+    "fuzzy_matching": true
+  },
+  "creator_reputation": {
+    "high_value_keywords": ["finance", "invest", "quant", "tech", "code", "build", "econ", "data", "startup"],
+    "low_value_keywords": ["meme", "daily", "spam", "funny", "highlights", "fanpage", "news_hub", "sports"]
+  },
+  "engagement_bait": {
+    "triggers": ["follow for more", "tag a friend", "double tap", "thoughts?", "if you agree", "comment below"]
+  },
+  "min_caption_length": 5
+}
