@@ -10,6 +10,7 @@ Individual source summaries from Twitter/X and Instagram.
 
 | Source | Title | Date | Tags | Relevance |
 |--------|-------|------|------|-----------|
+| twitter | [[LLM Code Mistakes]] | 2026-04-12 | tech | 8 |
 <!-- Auto-populated by ingest -->
 
 ---
@@ -20,6 +21,7 @@ People, companies, books, and tools mentioned across sources.
 
 | Name | Type | Mentions | Last Updated |
 |------|------|----------|--------------|
+| [[Andrej Karpathy]] | person | 1 | 2026-04-15 |
 <!-- Auto-populated by ingest -->
 
 ---
@@ -30,6 +32,9 @@ Topics, frameworks, and ideas synthesized from multiple sources.
 
 | Topic | Sources | Last Updated | Key Insight |
 |-------|---------|--------------|-------------|
+| [[Large Language Models]] | 1 | 2026-04-15 | |
+| [[Code Generation]] | 1 | 2026-04-15 | |
+| [[Machine Learning]] | 1 | 2026-04-15 | |
 <!-- Auto-populated by ingest -->
 
 ---
