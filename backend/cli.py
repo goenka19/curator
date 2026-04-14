@@ -63,12 +63,12 @@ def fetch_twitter_command(limit=10):
     print(f"🐦 Fetching up to {limit} Twitter bookmarks...")
     print(f"   DEV_MODE: {os.getenv('DEV_MODE', 'false')}")
     
+    extractor = TwitterExtractor()
+    items = extractor.fetch_bookmarks(limit=limit)
+    
+    # Log cost
     db = SessionLocal()
     try:
-        extractor = TwitterExtractor()
-        items = extractor.fetch_bookmarks(db, limit=limit)
-        
-        # Log cost
         cost = len(items) * 0.005  # $0.005 per tweet
         log_api_cost(db, 'twitter', 'fetch_bookmarks', len(items), cost)
         
@@ -201,7 +201,14 @@ Return JSON:
                     item.entities_json = json.dumps(data.get('entities', []))
                     item.concepts_json = json.dumps(data.get('concepts', []))
                     item.ai_insight = data.get('summary', '')
-                    item.key_points = data.get('key_points', '')
+                    
+                    # Convert key_points to string (handle both list and string)
+                    key_points = data.get('key_points', '')
+                    if isinstance(key_points, list):
+                        item.key_points = json.dumps(key_points)
+                    else:
+                        item.key_points = key_points
+                    
                     item.relevance_score = data.get('relevance_score', 5)
                     item.category = data.get('category', 'other')
                     item.ai_processed = True
