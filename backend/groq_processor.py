@@ -36,8 +36,8 @@ class GroqAIProcessor:
         self.vision_model = "meta-llama/llama-4-scout-17b-16e-instruct"
         self.analysis_model = "llama-3.3-70b-versatile"
         
-        # Frame sampling interval (1 second to catch all content)
-        self.frame_interval = 1
+        # Frame sampling interval (2.5 seconds - balance between detail and speed)
+        self.frame_interval = 2.5
         self.max_duration = 180
     
     def process_reel(self, db: SessionLocal, item: ContentItem) -> Dict[str, Any]:
@@ -263,7 +263,15 @@ TASKS:
 
 5. TAGS: Generate 5-8 specific tags (keywords) for this content
 
-6. ACTION ITEMS: List 1-3 specific actions someone should take based on this reel
+6. KEY STEPS/PROCESS: If the reel explains a process, method, or steps, extract them explicitly:
+   - List the numbered steps (Step 1, Step 2, Step 3, etc.)
+   - Include specific details for each step
+   - Note any important setup requirements
+
+7. ACTION ITEMS: List 3-5 specific, actionable items someone should take based on this reel:
+   - Include the key steps mentioned above
+   - Add any setup or configuration actions
+   - Make them concrete and executable
 
 Format as JSON:
 {{
@@ -275,7 +283,8 @@ Format as JSON:
   "relevance_reason": "...",
   "category": "...",
   "tags": ["tag1", "tag2", ...],
-  "action_items": ["..."]
+  "key_steps": ["Step 1: ...", "Step 2: ...", "Step 3: ..."],
+  "action_items": ["Specific action 1", "Specific action 2", ...]
 }}
 """
         
@@ -325,6 +334,11 @@ Format as JSON:
         # Build rich insight from analysis
         insight_parts = []
         insight_parts.append(f"SUMMARY: {analysis.get('summary', '')}")
+        
+        if analysis.get('key_steps'):
+            insight_parts.append("\n\nKEY STEPS:")
+            for step in analysis['key_steps']:
+                insight_parts.append(f"- {step}")
         
         if analysis.get('key_claims'):
             insight_parts.append("\n\nKEY CLAIMS:")

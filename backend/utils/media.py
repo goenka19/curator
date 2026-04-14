@@ -117,10 +117,12 @@ def extract_frames(video_path: str, interval_seconds: int = 5) -> List[Tuple[str
     
     frames = []
     try:
-        for timestamp in range(0, int(duration), interval_seconds):
+        # Use while loop to support float intervals (e.g., 2.5 seconds)
+        timestamp = 0.0
+        while timestamp < duration:
             # Format timestamp for ffmpeg
             time_str = str(timedelta(seconds=timestamp))
-            frame_path = frames_dir / f"frame_{timestamp:04d}.jpg"
+            frame_path = frames_dir / f"frame_{int(timestamp*10):04d}.jpg"
             
             cmd = [
                 'ffmpeg', '-y', '-ss', time_str,
@@ -133,6 +135,9 @@ def extract_frames(video_path: str, interval_seconds: int = 5) -> List[Tuple[str
             result = subprocess.run(cmd, capture_output=True, timeout=30)
             if result.returncode == 0 and frame_path.exists():
                 frames.append((str(frame_path), float(timestamp)))
+            
+            # Increment timestamp
+            timestamp += interval_seconds
         
         print(f"   ✅ Extracted {len(frames)} frames")
         return frames

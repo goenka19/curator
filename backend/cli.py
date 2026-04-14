@@ -327,10 +327,55 @@ def wiki_ingest_command(vault_path=None):
     finally:
         db.close()
 
+def wiki_lint_command(vault_path=None):
+    """Run weekly lint check on wiki."""
+    from backend.wiki_linter import WikiLinter
+    
+    if not vault_path:
+        vault_path = "/Users/ujjwalgoenka/Desktop/Coding/curator/curator_vault"
+    
+    print(f"🔍 Linting wiki at {vault_path}...")
+    
+    linter = WikiLinter(vault_path)
+    report = linter.lint()
+    
+    print("\n" + "="*60)
+    print("📊 Lint Report Summary")
+    print("="*60)
+    print(f"Orphan Pages: {report['summary']['orphan_pages']}")
+    print(f"Knowledge Gaps: {report['summary']['knowledge_gaps']}")
+    print(f"Synthesis Opportunities: {report['summary']['synthesis_opportunities']}")
+    print(f"Contradictions: {report['summary']['contradictions']}")
+    print("="*60)
+    
+    if report['synthesis_opportunities']:
+        print("\n💡 Run 'wiki-generate-synthesis' to auto-create synthesis pages")
+    
+    return report
+
+def wiki_generate_synthesis_command(vault_path=None):
+    """Generate synthesis pages from patterns."""
+    from backend.synthesis_generator import SynthesisGenerator
+    
+    if not vault_path:
+        vault_path = "/Users/ujjwalgoenka/Desktop/Coding/curator/curator_vault"
+    
+    print(f"🧬 Generating synthesis pages at {vault_path}...")
+    
+    generator = SynthesisGenerator(vault_path)
+    created = generator.generate_all()
+    
+    print(f"\n✅ Synthesis generation complete!")
+    print(f"   Created {len(created)} pages:")
+    for page in created:
+        print(f"   - {page}")
+    
+    return len(created)
+
 def main():
     parser = argparse.ArgumentParser(description="Content Curator CLI")
     parser.add_argument("command", 
-                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "mark"], 
+                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "mark"], 
                        help="Command to run")
     parser.add_argument("--id", type=int, help="Item ID for 'mark' command")
     parser.add_argument("--status", choices=["valuable", "trash"], help="Status for 'mark' command")
@@ -358,6 +403,10 @@ def main():
         ai_process_command(limit=limit)
     elif args.command == "wiki-ingest":
         wiki_ingest_command(vault_path=args.vault)
+    elif args.command == "wiki-lint":
+        wiki_lint_command(vault_path=args.vault)
+    elif args.command == "wiki-generate-synthesis":
+        wiki_generate_synthesis_command(vault_path=args.vault)
     else:
         parser.print_help()
 

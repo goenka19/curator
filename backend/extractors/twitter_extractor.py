@@ -3,6 +3,7 @@ import re
 import requests
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from pathlib import Path
 from backend.extractors.base_extractor import BaseExtractor
 from backend.filtering.engine import FilteringEngine
 from backend.database import SessionLocal, is_duplicate, save_content_item
@@ -13,6 +14,8 @@ class TwitterExtractor(BaseExtractor):
         self.access_token = os.getenv('TWITTER_OAUTH2_ACCESS_TOKEN')
         self.base_url = "https://api.twitter.com/2"
         self.filter_engine = FilteringEngine()
+        self.raw_sources_path = Path("/Users/ujjwalgoenka/Desktop/Coding/curator/curator_vault/raw-sources/twitter")
+        self.raw_sources_path.mkdir(parents=True, exist_ok=True)
 
     def detect_urls(self, text: str) -> Dict[str, List[str]]:
         """Detect and classify URLs in tweet text."""
@@ -38,13 +41,54 @@ class TwitterExtractor(BaseExtractor):
                 classified['other'].append(url)
         
         return classified
+    
+    def save_raw_backup(self, tweet: Dict, creator: str, urls: Dict) -> str:
+        """Save raw tweet to backup folder (minimal info, not full blogs/videos)."""
+        tweet_id = tweet['id']
+        filename = f"{tweet_id}.md"
+        filepath = self.raw_sources_path / filename
+        
+        # Skip if already exists
+        if filepath.exists():
+            return str(filepath)
+        
+        text = tweet.get('text', '')
+        date = tweet.get('created_at', datetime.utcnow().isoformat())
+        
+        # Build external links list (just URLs, not content)
+        external_links = []
+        if urls['external']:
+            external_links.extend(urls['external'])
+        if urls['x_articles']:
+            external_links.extend(urls['x_articles'])
+        if urls['youtube']:
+            external_links.extend(urls['youtube'])
+        
+        content = f"""---
+tweet_id: "{tweet_id}"
+author: "@{creator}"
+date: "{date}"
+url: "https://x.com/{creator}/status/{tweet_id}"
+---
 
-class TwitterExtractor(BaseExtractor):
-    def __init__(self):
-        super().__init__(api_name='twitter')
-        self.access_token = os.getenv('TWITTER_OAUTH2_ACCESS_TOKEN')
-        self.base_url = "https://api.twitter.com/2"
-        self.filter_engine = FilteringEngine()
+## Tweet Text
+
+{text}
+
+## External Links (Not Fetched)
+
+{chr(10).join([f"- {url}" for url in external_links]) if external_links else "_No external links_"}
+
+## Note
+
+This is a raw backup of the tweet. 
+- External content (blogs, videos, X Articles) is NOT stored here
+- See wiki/summaries/ for processed version with insights
+- Visit URLs above to read full external content
+"""
+        
+        filepath.write_text(content, encoding='utf-8')
+        return str(filepath)
 
     def fetch_bookmarks(self, limit: int = 50) -> List[Dict[str, Any]]:
         """
@@ -108,6 +152,9 @@ class TwitterExtractor(BaseExtractor):
             urls = self.detect_urls(text)
             has_x_article = len(urls['x_articles']) > 0
             has_external = len(urls['external']) > 0
+            
+            # Save raw backup (minimal - just tweet text, not external content)
+            backup_path = self.save_raw_backup(tweet, creator, urls)
             
             # Apply Filter
             should_pass, reason = self.filter_engine.should_process(text, creator)
