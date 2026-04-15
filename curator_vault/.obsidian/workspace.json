@@ -11,24 +11,10 @@
             "id": "d02737fb43eade4b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Welcome.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Welcome"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -190,8 +176,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "e05dbac9550ddcce",
+  "active": "d02737fb43eade4b",
   "lastOpenFiles": [
+    "wiki/books/Rich Dad Poor Dad.md",
+    "Welcome.md",
     "wiki/concepts/Entrepreneurship.md",
     "wiki/concepts/Compound Interest.md",
     "wiki/concepts/Second-Level Thinking.md",
@@ -217,8 +205,6 @@
     "CLAUDE.md",
     "Apollo Global.md",
     "wiki/synthesis/lint-report-2026-04-15.md",
-    "wiki/concepts/Machine Learning.md",
-    "wiki/concepts/Large Language Models.md",
     "wiki/books",
     "wiki/highlights",
     "raw-sources/x-articles",
