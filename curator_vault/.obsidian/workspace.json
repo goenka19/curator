@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "wiki/summaries/LLM Code Mistakes.md",
+                "file": "Welcome.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,7 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "LLM Code Mistakes"
+              "title": "Welcome"
             }
           }
         ]
@@ -190,36 +190,43 @@
       "bases:Create new base": false
     }
   },
-  "active": "d02737fb43eade4b",
+  "active": "e05dbac9550ddcce",
   "lastOpenFiles": [
-    "raw-sources/twitter/2043374229199151351.md",
+    "wiki/concepts/Entrepreneurship.md",
+    "wiki/concepts/Compound Interest.md",
+    "wiki/concepts/Second-Level Thinking.md",
+    "wiki/concepts/Deep Work.md",
+    "wiki/concepts/Value Investing.md",
+    "wiki/concepts/Wealth Building.md",
+    "wiki/concepts/Risk Management.md",
+    "wiki/entities/Peter Thiel.md",
+    "wiki/entities/Joel Greenblatt.md",
+    "wiki/entities/Napoleon Hill.md",
+    "wiki/entities/Ayn Rand.md",
+    "wiki/entities/Eric Jorgenson.md",
+    "wiki/entities/Robert Kiyosaki.md",
+    "wiki/entities/Cal Newport.md",
+    "wiki/entities/Peter Lynch.md",
+    "wiki/entities/Howard Marks.md",
+    "wiki/entities/Phil Knight.md",
+    "wiki/entities/Morgan",
+    "log.md",
+    "hot.md",
+    "index.md",
+    "Private Credit.md",
+    "CLAUDE.md",
+    "Apollo Global.md",
     "wiki/synthesis/lint-report-2026-04-15.md",
+    "wiki/concepts/Machine Learning.md",
+    "wiki/concepts/Large Language Models.md",
+    "wiki/books",
+    "wiki/highlights",
     "raw-sources/x-articles",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media/DWjdnxMCpcL_frames/frame_0035.jpg\", 35.0.md",
-    "wiki/concepts/Code Generation.md",
     "Untitled",
-    "Welcome.md",
-    "2026-04-14.md",
-    "wiki/summaries/twitter-2043374229199151351.md",
-    "wiki/summaries/instagram-instagram_DVQmxeAEgWh.md",
-    "wiki/concepts/GitHub stars.md",
-    "Finance.md",
-    "wiki/summaries/instagram-instagram_DWjdnxMCpcL.md",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media/DWjdnxMCpcL_frames",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data/media",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames/frame_0030.jpg\", 30.0], [\"data",
     "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media/DWjdnxMCpcL_frames",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames",
-    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media",
-    "wiki/concepts/Coding patterns.md",
-    "wiki/entities/CLAUD.md.md",
-    "Apollo Global.md",
-    "twitter-2042293751805329445.md",
-    "Private Credit.md",
-    "wiki/index.md",
-    "wiki/entities/Andrej Karpathy.md",
-    "wiki/entities/akshay_pachaar.md"
+    "\"data/media/DWjdnxMCpcL_frames/frame_0000.jpg\", 0.0], [\"data/media/DWjdnxMCpcL_frames/frame_0005.jpg\", 5.0], [\"data/media/DWjdnxMCpcL_frames/frame_0010.jpg\", 10.0], [\"data/media/DWjdnxMCpcL_frames/frame_0015.jpg\", 15.0], [\"data/media/DWjdnxMCpcL_frames/frame_0020.jpg\", 20.0], [\"data/media/DWjdnxMCpcL_frames/frame_0025.jpg\", 25.0], [\"data/media"
   ]
 }

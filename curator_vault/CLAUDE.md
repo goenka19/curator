@@ -2,143 +2,158 @@
 
 ## Purpose
 
-This vault is a personal knowledge base for curated content from Twitter/X and Instagram. It uses the LLM Wiki pattern to create a persistent, compounding knowledge graph where insights accumulate and connect over time.
+This vault is a personal knowledge base for curated content from Twitter/X, Instagram, and Books. It uses the LLM Wiki pattern to create a persistent, compounding knowledge graph where insights accumulate and connect over time.
 
-## Architecture
+## Architecture (Updated 2026-04-15)
 
 ```
 curator_vault/
 ├── CLAUDE.md              # This file - schema and conventions
 ├── index.md               # Master catalog (updated on every ingest)
+├── hot.md                 # Recent context cache (session persistence)
 ├── log.md                 # Chronological activity log
 ├── raw-sources/           # IMMUTABLE source material
-│   ├── twitter/          # Raw tweet exports
-│   └── instagram/        # Raw Instagram exports
-└── wiki/                  # LLM-generated knowledge base
-    ├── summaries/        # Source summaries (one per item)
-    ├── entities/         # People, companies, tools
-    ├── concepts/         # Topics, frameworks, ideas
-    └── synthesis/        # Cross-source pattern analysis
+│   ├── twitter/          # Raw tweet exports (minimal)
+│   └── instagram/        # Raw Instagram exports (minimal)
+├── wiki/                  # LLM-generated knowledge base
+│   ├── books/            # Book pages with ALL highlights (readable)
+│   ├── entities/         # People, companies (linked to books)
+│   ├── concepts/         # Topics, frameworks, ideas (connect books)
+│   └── highlights/       # EMPTY - removed (too noisy)
+├── skills/               # claude-obsidian plugin skills
+├── commands/             # claude-obsidian plugin commands
+└── agents/               # claude-obsidian plugin agents
 ```
+
+## Key Design Decisions
+
+### Book-First Architecture
+
+**REMOVED:** 700+ individual highlight pages (too noisy, unmaintainable)
+
+**KEPT:** 12 book pages with ALL highlights readable in one place
+
+**ADDED:** Shared entity/concept pages that connect multiple books
+
+This creates a cleaner graph:
+- Books → contain highlights (readable)
+- Entities/Concepts → link to multiple books (connections)
+- No orphan pages
+- Dense linking between related ideas
 
 ## Operations
 
-### Ingest Workflow
+### Book Import Workflow
 
-When new content arrives:
+1. Parse CSV exports (books + highlights)
+2. Create book pages with full highlights readable
+3. Extract recurring entities and concepts
+4. Create shared entity/concept pages ONLY for high-value connections
+5. Update index.md, hot.md, log.md
+6. Books automatically link to entities/concepts via [[backlinks]]
 
-1. **Read the source** (tweet or reel)
-2. **Extract**: key ideas, entities (people/companies/tools), concepts (topics)
-3. **Apply pre-filter**: Skip if NBA, memes, engagement bait (use rules.json)
-4. **Create summary page** in `/wiki/summaries/`
-5. **Update/create entity pages** in `/wiki/entities/` with bi-temporal references
-6. **Update/create concept pages** in `/wiki/concepts/` with aggregated knowledge
-7. **Generate synthesis** if pattern detected across 3+ sources
-8. **Add [[backlinks]]** between related pages
-9. **Update index.md** with new entry
-10. **Append to log.md**
+### Twitter/Instagram Ingest Workflow
+
+1. Fetch bookmarks via API (with deduplication)
+2. Pre-filter content (skip NBA, memes, etc.)
+3. AI process valuable content
+4. Create summary page in wiki/summaries/
+5. Update/create entity and concept pages
+6. Link to existing concepts (unify with books!)
+7. Update index.md, hot.md, log.md
 
 ### Query Workflow
 
-When user asks a question:
+When you ask a question:
 
-1. Read index.md to find relevant pages
-2. Read those pages (entity and concept pages)
-3. Synthesize answer with [[citations]]
-4. If answer is valuable, save as new synthesis page
+1. Read hot.md first (recent context cache)
+2. Read index.md to find relevant pages
+3. Read entity/concept pages for aggregated knowledge
+4. Read book pages for detailed highlights
+5. Synthesize answer with [[citations]]
+6. If valuable, save as new synthesis page
 
 ### Lint Workflow (Weekly)
 
 Health check the wiki:
 
 1. Find orphan pages (no inbound links)
-2. Find contradictions between sources
+2. Find dead links (broken [[references]])
 3. Find concepts mentioned but lacking dedicated pages
-4. Find stale claims superseded by newer sources
-5. Write report to `/wiki/synthesis/lint-report.md`
+4. Find books without entity/concept connections
+5. Write report to vault root or log.md
 
-## Naming Conventions
+## File Naming Conventions
 
-### File Names
+### Books
+- `{Book-Title}.md` - e.g., `The-Psychology-of-Money.md`
+- Full title preserved for readability
+- Special chars replaced with hyphens
 
-- **Summaries**: `{source}-{id}.md` (e.g., `twitter-1234567890.md`)
-- **Entities**: `{Name}.md` (e.g., `Apollo Global.md`, `Naval Ravikant.md`)
-- **Concepts**: `{Topic Name}.md` (e.g., `Private Credit.md`, `AI.md`)
-- **Synthesis**: `{Pattern}.md` (e.g., `Apollo Global in Private Credit.md`)
+### Entities
+- `{Name}.md` - e.g., `Morgan-Housel.md`, `Nike.md`
+- Person or organization
+- Links to books they're mentioned in
 
-### Bi-Temporal References
-
-All references must track BOTH:
-- **When said**: Date of original content (tweet/reel date)
-- **When learned**: Date ingested into vault
-
-Format:
-```markdown
-- [[twitter-12345]] (Apr 14, 2025) - "Apollo expanding..."
-  - Ingested: 2025-04-14
-  - Context: Q1 earnings call
-```
+### Concepts
+- `{Topic-Name}.md` - e.g., `Risk-Management.md`, `Deep-Work.md`
+- Recurring ideas across multiple sources
+- Aggregates insights from all books/tweets mentioning them
 
 ## Frontmatter Templates
 
-### Summary Page (Source)
-
+### Book Page
 ```yaml
 ---
-title: "Tweet Title or First 50 chars"
-type: summary
-source: twitter | instagram
-source_id: "1234567890"
-author: "@username"
-date: "2025-04-14"          # Original content date
-ingested: "2025-04-14"      # When added to vault
-tags: [tag1, tag2]
-relevance: 8                 # 1-10 score
-entities: ["Entity 1", "Entity 2"]
-concepts: ["Concept 1", "Concept 2"]
+type: book
+author: "[[Author Name]]"
+read_date: YYYY-MM-DD
+total_highlights: N
+source: books
 ---
 ```
 
-### Entity Page (Person/Company/Tool)
-
+### Entity Page
 ```yaml
 ---
-title: "Entity Name"
 type: entity
-entity_type: person | company | book | tool
-created: "2025-04-14"
-updated: "2025-04-14"
-tags: [entity]
+entity_type: person | company | book
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: []
 ---
 ```
 
-### Concept Page (Topic)
-
+### Concept Page
 ```yaml
 ---
-title: "Concept Name"
 type: concept
-created: "2025-04-14"
-updated: "2025-04-14"
-tags: [concept]
-related_concepts: ["Related 1", "Related 2"]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: []
+related_concepts: []
 ---
 ```
 
-### Synthesis Page (Pattern Analysis)
+## Backlink Strategy
 
-```yaml
----
-title: "Pattern Being Analyzed"
-type: synthesis
-created: "2025-04-14"
-updated: "2025-04-14"
-sources_count: 5
-entities: ["Entity 1"]
-concepts: ["Concept 1"]
-tags: [synthesis]
----
+### Books → Entities/Concepts
+Book pages mention entities/concepts using [[wikilinks]]:
+```markdown
+[[Morgan Housel]] discusses [[risk management]] in his book...
 ```
+
+### Entities/Concepts → Books
+Entity/concept pages link back to all books mentioning them:
+```markdown
+## References
+- [[The Psychology of Money]] - 58 highlights on risk
+```
+
+### Bidirectional Links
+Obsidian automatically creates backlinks, so:
+- If `[[Morgan Housel]]` appears in a book, the Morgan Housel page shows that book as a backlink
+- Graph view shows the connection automatically
 
 ## Content Rules
 
@@ -148,157 +163,55 @@ tags: [synthesis]
 - Poker game content (not strategy)
 - Jokes / Memes / Engagement bait
 - Content with no substance
+- Generic motivational quotes without specific insight
 
 ### KEEP & ANALYZE
 
 | Content Type | Action |
 |-------------|--------|
 | Finance, economics, companies | High relevance |
-| Book recommendations | Save with "should I read it?" analysis |
-| Blog/website links | Save to reading list, fetch if external |
+| Book highlights | Import with AI extraction |
+| Blog/website links | Save to reading list |
 | Long videos | Check title, keep link if relevant |
-| Poker strategy (math/business) | Keep |
-| Inspirational quotes | Keep only exceptional ones |
-
-## Backlink Strategy
-
-### Automatic Link Creation
-
-When processing content:
-
-1. **Extract entities** mentioned → Create/update entity pages
-2. **Extract concepts** mentioned → Create/update concept pages
-3. **In summary page**: Link to all entities and concepts
-   ```markdown
-   ## Entities
-   [[Apollo Global]] [[Blackstone]]
-   
-   ## Concepts
-   [[Private Credit]] [[Direct Lending]]
-   ```
-
-4. **In entity page**: Link back to all sources mentioning it
-   ```markdown
-   ## References
-   - [[twitter-12345]] (Apr 14, 2025) - Context...
-   - [[twitter-67890]] (Mar 12, 2025) - Context...
-   ```
-
-5. **In concept page**: Link to all sources and related concepts
-   ```markdown
-   ## Sources
-   - [[twitter-12345]]: Apollo expanding...
-   
-   ## Related Concepts
-   [[Alternative Lending]] [[Credit Markets]]
-   ```
-
-### Bidirectional Links
-
-Obsidian automatically creates backlinks. If `[[Apollo Global]]` appears in a summary, the Apollo Global entity page will show that summary as a backlink.
-
-## Synthesis Generation
-
-### When to Create
-
-Create a synthesis page when:
-- 3+ sources mention the same entity AND concept
-- Pattern emerges across multiple time periods
-- Contradicting claims need reconciliation
-
-### Synthesis Structure
-
-```markdown
-# Synthesis: {Entity} in {Context}
-
-## Key Insight
-One-paragraph synthesis of the pattern.
-
-## Timeline
-Chronological list of mentions with context.
-
-## Claims Analysis
-| Claim | Sources | Status |
-|-------|---------|--------|
-| Claim 1 | 3 sources | Consistent |
-| Claim 2 | 2 sources | Contradictory |
-
-## Related
-- Entities: [[Entity 1]] [[Entity 2]]
-- Concepts: [[Concept 1]] [[Concept 2]]
-```
-
-## Index Format
-
-The index.md is updated on every ingest:
-
-```markdown
-## Summaries
-| Source | Title | Date | Tags |
-|--------|-------|------|------|
-| twitter | [[twitter-12345]] | 2025-04-14 | finance, ai |
-
-## Entities
-| Name | Type | Mentions |
-|------|------|----------|
-| [[Apollo Global]] | company | 5 |
-
-## Concepts
-| Topic | Sources | Last Updated |
-|-------|---------|--------------|
-| [[Private Credit]] | 8 | 2025-04-14 |
-
-## Synthesis
-| Pattern | Sources | Last Updated |
-|---------|---------|--------------|
-| [[Apollo in Private Credit]] | 5 | 2025-04-14 |
-```
-
-## Log Format
-
-Append-only with consistent prefix:
-
-```markdown
-## [2025-04-14 14:30] ingest | twitter-12345: Apollo expanding private credit
-- Entities: Apollo Global, Blackstone
-- Concepts: Private Credit
-- Relevance: 9/10
-
-## [2025-04-14 14:35] ingest | twitter-67890: New AI tool released
-- Entities: OpenAI
-- Concepts: AI, Productivity
-- Relevance: 8/10
-```
+| Investment strategies | Keep |
+| Exceptional quotes | Keep only if truly insightful |
 
 ## Graph View Optimization
 
 For best Obsidian graph visualization:
 
-1. Use consistent `type:` in frontmatter (summary, entity, concept, synthesis)
+1. Use consistent `type:` in frontmatter (book, entity, concept)
 2. Use `[[Page Name]]` format (spaces allowed)
 3. Tag pages appropriately
 4. Keep entity/concept pages as hub nodes (many connections)
-5. Avoid orphan pages (always link to/from something)
+5. Book pages should connect to multiple entities/concepts
+6. Avoid orphan pages (always link to/from something)
 
-## Tools Integration
+## Cost Control (Unique to This System)
 
-### Obsidian Plugins Recommended
+- Daily API limit: $0.50
+- Monthly API limit: $5.00
+- Pre-filter before AI: 60-70% cost reduction
+- Deduplication: Never pay for same data twice
+- DEV_MODE: Limit to 10 items in development
+- Log all API costs: curator.db tracks every call
 
-- **Dataview**: Query frontmatter for dynamic tables
-- **Graph View**: Visualize connections
-- **Templater**: Template automation (optional)
+## Integration with claude-obsidian
 
-### CLI Commands
+This vault now uses claude-obsidian plugin for:
+- `/wiki` - Setup and scaffolding
+- `/save` - Save conversations to wiki
+- `/autoresearch` - Web research loop
+- `skills/wiki/` - Ingest, query, lint operations
+- `commands/` - Structured command interface
 
-```bash
-# Ingest latest tweets
-python backend/cli.py fetch-twitter --limit 10
-python backend/cli.py wiki-ingest
-
-# Weekly lint
-python backend/cli.py wiki-lint
-```
+Custom additions:
+- `backend/` - Python backend for Twitter/Instagram/Book ingestion
+- Cost tracking and budget protection
+- Source-specific extractors (Twitter API, Instagram, CSV)
 
 ## Version History
 
-- 2025-04-14: Initial schema creation
+- 2026-04-15: Major refactor - removed 700+ highlight pages, added claude-obsidian integration, created proper entity/concept architecture
+- 2026-04-15: Initial book import (12 books, 715 highlights)
+- 2026-04-14: Initial vault setup
