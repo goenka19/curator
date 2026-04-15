@@ -371,10 +371,25 @@ def wiki_generate_synthesis_command(vault_path=None):
     
     return len(created)
 
+def import_books_command(vault_path=None):
+    """Import book highlights from CSV files."""
+    from backend.books_importer import BooksImporter
+    
+    if not vault_path:
+        vault_path = "/Users/ujjwalgoenka/Desktop/Coding/curator/curator_vault"
+    
+    print(f"📚 Importing book highlights to {vault_path}...")
+    print(f"   Source: export.csv, export2.csv")
+    
+    importer = BooksImporter(vault_path)
+    stats = importer.import_all()
+    
+    return stats['errors'] == 0
+
 def main():
     parser = argparse.ArgumentParser(description="Content Curator CLI")
     parser.add_argument("command", 
-                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "mark"], 
+                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "import-books", "mark"], 
                        help="Command to run")
     parser.add_argument("--id", type=int, help="Item ID for 'mark' command")
     parser.add_argument("--status", choices=["valuable", "trash"], help="Status for 'mark' command")
@@ -406,6 +421,9 @@ def main():
         wiki_lint_command(vault_path=args.vault)
     elif args.command == "wiki-generate-synthesis":
         wiki_generate_synthesis_command(vault_path=args.vault)
+    elif args.command == "import-books":
+        success = import_books_command(vault_path=args.vault)
+        sys.exit(0 if success else 1)
     else:
         parser.print_help()
 
