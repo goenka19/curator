@@ -245,7 +245,7 @@ def main():
     if save_token_to_env(token_data):
         print("\n🎉 Authentication complete!")
         print("\nNext step:")
-        print("  python test_twitter_bookmarks.py")
+        print("  python tests/test_twitter_bookmarks.py")
     else:
         print("\n❌ Failed to save token")
 

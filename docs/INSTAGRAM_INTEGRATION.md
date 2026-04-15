@@ -93,7 +93,7 @@ print(result)
 ### Full Pipeline Test
 
 ```bash
-python test_instagram.py
+python tests/test_instagram.py
 ```
 
 ### Processing Queue

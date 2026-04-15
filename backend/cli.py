@@ -11,7 +11,6 @@ load_dotenv()
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.database import init_db, SessionLocal, get_db
-from backend.ai_processor import AIProcessor
 from backend.models import ContentItem, APICostLog
 from backend.filtering.engine import FilteringEngine
 from backend.obsidian_wiki import ObsidianWiki
