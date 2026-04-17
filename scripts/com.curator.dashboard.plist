@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.curator.dashboard</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ujjwalgoenka/Desktop/Coding/curator/backend/venv/bin/python</string>
+        <string>-c</string>
+        <string>import sys; sys.path.insert(0, '/Users/ujjwalgoenka/Desktop/Coding/curator'); from backend.cli import dashboard_check_command; dashboard_check_command()</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/ujjwalgoenka/Desktop/Coding/curator</string>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/ujjwalgoenka/.curator/logs/launchagent.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/ujjwalgoenka/.curator/logs/launchagent-error.log</string>
+    
+    <!-- Run on wake from sleep -->
+    <key>RunAtLoad</key>
+    <false/>
+    
+    <!-- Also run daily at 9:00 AM as backup -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    
+    <!-- Don't run if already ran recently (handled by Python code) -->
+    <key>ThrottleInterval</key>
+    <integer>3600</integer>
+    
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/Users/ujjwalgoenka/Desktop/Coding/curator/backend/venv/bin</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/ujjwalgoenka/Desktop/Coding/curator</string>
+    </dict>
+</dict>
+</plist>

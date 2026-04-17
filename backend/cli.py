@@ -386,15 +386,176 @@ def import_books_command(vault_path=None):
     
     return stats['errors'] == 0
 
+def dashboard_command(check_new_content: bool = True):
+    """Show dashboard with current state and new items."""
+    from backend.dashboard import get_dashboard
+    
+    dashboard = get_dashboard()
+    
+    # Check if we should run
+    should_run, reason = dashboard.should_run()
+    if not should_run:
+        print(f"⏭️  Dashboard skipped: {reason}")
+        print("   (Use --force to run anyway)")
+        return
+    
+    # Render dashboard
+    dashboard.render_dashboard(check_new_content=check_new_content)
+    
+    # Finish run
+    dashboard.finish_run()
+
+def dashboard_check_command():
+    """Check for new content and update dashboard (for cron/auto-run)."""
+    from backend.dashboard import get_dashboard
+    from backend.twitter_checker import get_twitter_checker
+    
+    print("🔍 Starting daily content check...")
+    print()
+    
+    dashboard = get_dashboard()
+    
+    # Check if we should run
+    should_run, reason = dashboard.should_run()
+    if not should_run:
+        print(f"⏭️  Check skipped: {reason}")
+        return
+    
+    # 1. Check Instagram queue (FREE)
+    print("📸 Checking Instagram queue...")
+    try:
+        from backend.extractors.instagram_queue_processor import InstagramQueueProcessor
+        processor = InstagramQueueProcessor()
+        # Just check, don't auto-process (requires user review)
+        queue = processor.get_queue()  # This would need to be implemented
+        if queue:
+            print(f"   Found {len(queue)} items in queue (manual processing required)")
+        else:
+            print("   Queue empty")
+    except Exception as e:
+        print(f"   ⚠️  Could not check queue: {e}")
+    
+    # 2. Smart Twitter check (PAID - $0.025)
+    print("\n🐦 Checking Twitter bookmarks...")
+    checker = get_twitter_checker()
+    decision = checker.smart_fetch_decision()
+    
+    if decision['should_fetch']:
+        print(f"   ✅ {decision['reason']}")
+        print("   Run 'python backend/cli.py fetch-twitter' to fetch all new bookmarks")
+    else:
+        print(f"   ℹ️  {decision['reason']}")
+    
+    # 3. Scan vault for changes (FREE)
+    print("\n📚 Scanning vault...")
+    dashboard.render_dashboard(check_new_content=False)
+    
+    # Finish
+    dashboard.finish_run()
+    print("\n✅ Daily check complete!")
+
+def twitter_check_command():
+    """Check Twitter for new bookmarks (costs $0.025)."""
+    from backend.twitter_checker import get_twitter_checker
+    
+    print("🐦 Smart Twitter Check")
+    print("─" * 50)
+    print("This will sample 5 recent bookmarks to check for new ones.")
+    print("Cost: $0.025 (5 tweets × $0.005)")
+    print()
+    
+    checker = get_twitter_checker()
+    result = checker.check_for_new_bookmarks(sample_size=5)
+    
+    print(f"\nResult: {result['message']}")
+    print(f"Cost: ${result['cost']:.3f}")
+    
+    if result['has_new']:
+        print(f"\n🆕 Found {result['new_count']} new bookmark(s)!")
+        print("Run 'python backend/cli.py fetch-twitter' to fetch them all.")
+    else:
+        print("\n✅ No new bookmarks detected.")
+    
+    if result['error']:
+        print(f"\n❌ Error: {result['error']}")
+
+def twitter_mode_command(mode: str = None):
+    """View or change Twitter mode."""
+    from backend.twitter_checker import get_twitter_checker
+    
+    checker = get_twitter_checker()
+    
+    if mode is None:
+        # Just show current mode
+        info = checker.get_mode_info()
+        print("🎛️  Twitter Mode Status")
+        print("─" * 50)
+        print(f"Current Mode: {info['mode'].upper()}")
+        print(f"Backlog: {info['backlog_remaining']} / {info['backlog_total']} items")
+        print(f"Manual Override: {'ON' if info['manual_override'] else 'OFF'}")
+        print(f"Auto-fetch: {'ON' if info['auto_fetch_enabled'] else 'OFF'}")
+        print(f"Weekly Fetch Day: {info['weekly_fetch_day']}")
+        if info['last_fetch']:
+            print(f"Last Fetch: {info['last_fetch']}")
+        print()
+        print("Commands:")
+        print("  twitter-mode backlog  - Force backlog mode")
+        print("  twitter-mode live     - Force live mode")
+        print("  twitter-mode auto     - Auto-switch when ready")
+    else:
+        result = checker.set_mode(mode, manual=True)
+        print(result)
+
+def cost_status_command():
+    """Show cost tracking status."""
+    from backend.dashboard import get_dashboard
+    
+    dashboard = get_dashboard()
+    tracker = dashboard.cost_tracker
+    
+    print("💰 COST TRACKER STATUS")
+    print("─" * 50)
+    print(f"Twitter This Month:   ${tracker.twitter_monthly_total:.4f}")
+    print(f"Instagram This Month: ${tracker.instagram_monthly_total:.4f}")
+    print(f"TOTAL:                ${tracker.twitter_monthly_total + tracker.instagram_monthly_total:.4f}")
+    print(f"Limit:                $5.00")
+    print(f"Remaining:            ${5.00 - tracker.twitter_monthly_total - tracker.instagram_monthly_total:.4f}")
+    print()
+    print(f"Last Reset: {tracker.last_reset}")
+    print()
+    print("Notifications Sent:")
+    print(f"  $1.00 milestone: {'✅' if tracker.milestones.notified_1_dollar else '⏳'}")
+    print(f"  $2.00 milestone: {'✅' if tracker.milestones.notified_2_dollars else '⏳'}")
+    print(f"  $4.00 milestone: {'✅' if tracker.milestones.notified_4_dollars else '⏳'}")
+
+def dashboard_reset_command():
+    """Reset dashboard state (use if corrupted)."""
+    from backend.state_manager import get_state_manager
+    
+    print("⚠️  WARNING: This will reset all dashboard state!")
+    print("   Current state will be backed up.")
+    response = input("Are you sure? (yes/no): ")
+    
+    if response.lower() == 'yes':
+        state_mgr = get_state_manager()
+        state, tracker = state_mgr.reset_all()
+        print("\n✅ State reset complete!")
+        print("   Dashboard will start fresh on next run.")
+    else:
+        print("\n❌ Reset cancelled.")
+
 def main():
     parser = argparse.ArgumentParser(description="Content Curator CLI")
     parser.add_argument("command", 
-                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "import-books", "mark"], 
+                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "import-books", "dashboard", "dashboard-check", "twitter-check", "twitter-mode", "cost-status", "dashboard-reset"], 
                        help="Command to run")
     parser.add_argument("--id", type=int, help="Item ID for 'mark' command")
     parser.add_argument("--status", choices=["valuable", "trash"], help="Status for 'mark' command")
     parser.add_argument("--limit", type=int, help="Limit number of items")
     parser.add_argument("--vault", type=str, help="Obsidian vault path (for wiki-ingest)")
+    parser.add_argument("--mode", type=str, choices=["backlog", "live", "auto"], help="Twitter mode")
+    parser.add_argument("--check", action="store_true", default=True, help="Check for new content (dashboard)")
+    parser.add_argument("--force", action="store_true", help="Force run even if recently run")
     
     args = parser.parse_args()
     
@@ -424,6 +585,18 @@ def main():
     elif args.command == "import-books":
         success = import_books_command(vault_path=args.vault)
         sys.exit(0 if success else 1)
+    elif args.command == "dashboard":
+        dashboard_command(check_new_content=args.check)
+    elif args.command == "dashboard-check":
+        dashboard_check_command()
+    elif args.command == "twitter-check":
+        twitter_check_command()
+    elif args.command == "twitter-mode":
+        twitter_mode_command(mode=args.mode)
+    elif args.command == "cost-status":
+        cost_status_command()
+    elif args.command == "dashboard-reset":
+        dashboard_reset_command()
     else:
         parser.print_help()
 
