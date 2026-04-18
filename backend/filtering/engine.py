@@ -16,10 +16,12 @@ class FilteringEngine:
             return {}
 
     def fuzzy_match(self, text: str, keywords: List[str]) -> bool:
-        """Check if any of the keywords are present in the text (fuzzy matching)."""
+        """Check if any of the keywords are present in the text (word boundary matching)."""
         text = text.lower()
         for kw in keywords:
-            if kw.lower() in text:
+            # Use word boundary regex to match whole words only
+            pattern = r'\b' + re.escape(kw.lower()) + r'\b'
+            if re.search(pattern, text):
                 return True
         return False
 
