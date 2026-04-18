@@ -84,19 +84,20 @@ def fetch_twitter_command(limit=10):
         db.close()
 
 def process_media_batch_command(batch_size=10, offset=0):
-    """Process media for a batch of items (images/videos)."""
+    """Process media for a batch of items (images/videos) - LATEST FIRST."""
     from backend.extractors.twitter_extractor import TwitterExtractor
     
     print(f"🎬 Processing media batch (size={batch_size}, offset={offset})...")
+    print("   Ordering: Latest tweets first (by timestamp DESC)")
     
     db = SessionLocal()
     try:
-        # Get items that need media processing (passed filter, not processed yet)
+        # Get LATEST items that need media processing (passed filter, not processed yet)
         items = db.query(ContentItem).filter(
             ContentItem.source == 'twitter',
             ContentItem.pre_filter_passed == True,
             (ContentItem.media_analysis == None) | (ContentItem.media_analysis == '')
-        ).offset(offset).limit(batch_size).all()
+        ).order_by(ContentItem.timestamp.desc()).offset(offset).limit(batch_size).all()
         
         if not items:
             print("   No items need media processing")
@@ -112,6 +113,25 @@ def process_media_batch_command(batch_size=10, offset=0):
         print(f"   Images: {stats['images']}")
         print(f"   Videos: {stats['videos']}")
         print(f"   Failed: {stats['failed']}")
+        
+        # Show detailed extraction for each processed item
+        print("\n" + "="*80)
+        print("DETAILED EXTRACTION RESULTS")
+        print("="*80)
+        
+        for item in items:
+            if item.media_analysis:
+                print(f"\n--- @{item.creator_username} ---")
+                print(f"Tweet: {item.caption[:100]}{'...' if item.caption and len(item.caption) > 100 else ''}")
+                print(f"\nMedia Analysis:")
+                print(item.media_analysis[:500])
+                if item.media_analysis and len(item.media_analysis) > 500:
+                    print("... [truncated]")
+                
+                if item.external_links_json and item.external_links_json != '[]':
+                    import json
+                    links = json.loads(item.external_links_json)
+                    print(f"\nExternal Links: {len(links)} fetched")
         
         return stats['processed']
     finally:
