@@ -46,6 +46,8 @@ class ContentItem(Base):
     has_x_article = Column(Boolean, default=False)
     x_article_url = Column(String(512), nullable=True)
     external_url = Column(String(512), nullable=True)
+    external_links_json = Column(Text, nullable=True)  # JSON array of fetched external articles
+    media_analysis = Column(Text, nullable=True)  # Combined image/video analysis text
     
     # Meta tracking
     created_at = Column(DateTime, default=datetime.utcnow)

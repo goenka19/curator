@@ -83,6 +83,40 @@ def fetch_twitter_command(limit=10):
     finally:
         db.close()
 
+def process_media_batch_command(batch_size=10, offset=0):
+    """Process media for a batch of items (images/videos)."""
+    from backend.extractors.twitter_extractor import TwitterExtractor
+    
+    print(f"🎬 Processing media batch (size={batch_size}, offset={offset})...")
+    
+    db = SessionLocal()
+    try:
+        # Get items that need media processing (passed filter, not processed yet)
+        items = db.query(ContentItem).filter(
+            ContentItem.source == 'twitter',
+            ContentItem.pre_filter_passed == True,
+            (ContentItem.media_analysis == None) | (ContentItem.media_analysis == '')
+        ).offset(offset).limit(batch_size).all()
+        
+        if not items:
+            print("   No items need media processing")
+            return 0
+        
+        print(f"   Found {len(items)} items to process")
+        
+        extractor = TwitterExtractor()
+        stats = extractor.process_media_batch(db, items)
+        
+        print(f"\n✅ Media batch complete")
+        print(f"   Processed: {stats['processed']}")
+        print(f"   Images: {stats['images']}")
+        print(f"   Videos: {stats['videos']}")
+        print(f"   Failed: {stats['failed']}")
+        
+        return stats['processed']
+    finally:
+        db.close()
+
 def prefilter_command():
     """Run pre-filter on unfiltered items."""
     print("🔍 Running pre-filter on unfiltered items...")
@@ -169,11 +203,27 @@ def ai_process_command(limit=10):
                 processed_count += 1
                 continue
             
+            # Get media analysis and external links
+            media_analysis = item.media_analysis or ""
+            external_links = json.loads(item.external_links_json or "[]")
+            
+            # Build external content summary
+            external_summary = ""
+            if external_links:
+                external_summary = "\n\nEXTERNAL ARTICLES FETCHED:\n" + "\n".join([
+                    f"- {link['url']}: {link['summary'][:200]}" 
+                    for link in external_links[:3]
+                ])
+            
             # Extract value with strict relevance criteria
             prompt = f"""Analyze this content for KNOWLEDGE VALUE. Be extremely critical.
 
-Content: {item.caption or ''}
-Source: {item.source}
+TWEET TEXT: {item.caption or ''}
+
+MEDIA ANALYSIS (from images/videos in tweet):
+{media_analysis[:1500]}
+
+{external_summary}
 
 REJECT and mark low relevance (1-3) if:
 - Just vanity metrics (likes, stars, views, followers)
@@ -197,7 +247,7 @@ Return JSON:
   "actionable": "What should the reader DO with this info?",
   "entities": [{{"name": "significant person/company/tool only", "type": "person|company|book|tool"}}],
   "concepts": ["specific topics/frameworks worth researching"],
-  "relevance_score": 1-10 (be harsh: 7+ only if truly valuable),
+  "relevance_score": 1-10 (bookmark pre-filtered, so 2+ passes, 5+ is good, 8+ is excellent),
   "category": "finance|strategy|productivity|tech|psychology|other"
 }}
 
@@ -226,10 +276,10 @@ Remember: The user curates for QUALITY, not quantity. Be selective."""
                     result = resp.json()['choices'][0]['message']['content']
                     data = json.loads(result)
                     
-                    # Skip low-relevance content (user wants 7+ only)
+                    # Skip very low-relevance content (threshold: 2+ since already bookmarked & pre-filtered)
                     relevance = data.get('relevance_score', 5)
-                    if relevance < 7:
-                        print(f"   ⏩ SKIPPED: Low relevance ({relevance}/10)")
+                    if relevance < 2:
+                        print(f"   ⏩ SKIPPED: Very low relevance ({relevance}/10)")
                         item.ai_processed = True  # Mark as processed to skip
                         item.relevance_score = relevance
                         continue
@@ -546,12 +596,13 @@ def dashboard_reset_command():
 
 def main():
     parser = argparse.ArgumentParser(description="Content Curator CLI")
-    parser.add_argument("command", 
-                       choices=["init", "stats", "process-queue", "fetch-twitter", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "import-books", "dashboard", "dashboard-check", "twitter-check", "twitter-mode", "cost-status", "dashboard-reset"], 
+    parser.add_argument("command",
+                       choices=["init", "stats", "process-queue", "fetch-twitter", "process-media-batch", "pre-filter", "ai-process", "wiki-ingest", "wiki-lint", "wiki-generate-synthesis", "import-books", "dashboard", "dashboard-check", "twitter-check", "twitter-mode", "cost-status", "dashboard-reset"],
                        help="Command to run")
     parser.add_argument("--id", type=int, help="Item ID for 'mark' command")
     parser.add_argument("--status", choices=["valuable", "trash"], help="Status for 'mark' command")
     parser.add_argument("--limit", type=int, help="Limit number of items")
+    parser.add_argument("--offset", type=int, default=0, help="Offset for batch processing")
     parser.add_argument("--vault", type=str, help="Obsidian vault path (for wiki-ingest)")
     parser.add_argument("--mode", type=str, choices=["backlog", "live", "auto"], help="Twitter mode")
     parser.add_argument("--check", action="store_true", default=True, help="Check for new content (dashboard)")
@@ -571,6 +622,9 @@ def main():
         if os.getenv('DEV_MODE') == 'true':
             limit = min(limit, int(os.getenv('MAX_DEV_ITEMS', 10)))
         fetch_twitter_command(limit=limit)
+    elif args.command == "process-media-batch":
+        batch_size = args.limit or 10
+        process_media_batch_command(batch_size=batch_size, offset=args.offset)
     elif args.command == "pre-filter":
         prefilter_command()
     elif args.command == "ai-process":

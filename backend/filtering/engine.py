@@ -73,9 +73,8 @@ class FilteringEngine:
                 return False, "Low-value creator reputation"
 
         # 6. Default fallback
-        # If it doesn't match any rules, we can choose to process it or skip it.
-        # Given your requirement to be aggressive, we skip by default if it's not whitelisted.
-        return False, "No whitelist keywords found"
+        # Pass unless explicitly blacklisted - ensures high recall
+        return True, "Passed - no blacklist match"
 
 if __name__ == "__main__":
     # Test the engine
