@@ -489,44 +489,60 @@ Return JSON."""
             print("⚠️  GROQ_API_KEY not set - skipping media processing")
             return {'processed': 0, 'failed': 0}
         
-        stats = {'processed': 0, 'failed': 0, 'images': 0, 'videos': 0}
+        stats = {'processed': 0, 'failed': 0, 'images': 0, 'videos': 0, 'external_fetched': 0}
         
         for item in items:
-            if not item.media_url:
-                continue
-            
             try:
-                media_data = json.loads(item.media_url)
                 analysis_parts = []
                 
-                # Process images
-                for img in media_data.get('images', []):
-                    if 'url' in img and not item.media_analysis:
-                        print(f"   📸 Processing image for @{item.creator_username}...")
-                        analysis = self.process_image(img['url'], item.caption or '')
-                        analysis_parts.append(f"[Image]: {analysis[:300]}...")
-                        stats['images'] += 1
+                # Fetch external content first (if URLs exist and not already fetched)
+                if item.external_url and (not item.external_links_json or item.external_links_json == '[]'):
+                    print(f"   🔗 Fetching external content for @{item.creator_username}...")
+                    urls = self.detect_urls(item.caption or '')
+                    all_urls = urls['external'] + urls['other'] + urls['youtube']
+                    # Filter out X articles (can't fetch those)
+                    fetchable_urls = [u for u in all_urls if 'x.com/i/article' not in u and 'twitter.com/i/article' not in u]
+                    if fetchable_urls:
+                        external_content = self.fetch_external_content(fetchable_urls)
+                        if external_content:
+                            item.external_links_json = json.dumps(external_content)
+                            stats['external_fetched'] += len(external_content)
                 
-                # Process videos
-                for vid in media_data.get('videos', []):
-                    if 'url' in vid and not item.media_analysis:
-                        video_type = vid.get('type', 'short')
-                        duration = vid.get('duration', 0)
-                        
-                        if video_type == 'short':
-                            print(f"   🎬 Processing short video ({duration:.1f}s)...")
-                            analysis = self.process_short_video(vid['url'], duration, item.caption or '')
-                        else:
-                            print(f"   🎬 Processing long video ({duration/60:.1f}min)...")
-                            analysis = self.process_long_video(vid['url'], duration, item.caption or '')
-                        
-                        if 'summary' in analysis:
-                            analysis_parts.append(f"[Video]: {analysis['summary']}")
-                        stats['videos'] += 1
+                # Process media
+                if item.media_url:
+                    media_data = json.loads(item.media_url)
+                    
+                    # Process images
+                    for img in media_data.get('images', []):
+                        if 'url' in img and not item.media_analysis:
+                            print(f"   📸 Processing image for @{item.creator_username}...")
+                            analysis = self.process_image(img['url'], item.caption or '')
+                            analysis_parts.append(f"[Image]: {analysis[:300]}...")
+                            stats['images'] += 1
+                    
+                    # Process videos
+                    for vid in media_data.get('videos', []):
+                        if 'url' in vid and not item.media_analysis:
+                            video_type = vid.get('type', 'short')
+                            duration = vid.get('duration', 0)
+                            
+                            if video_type == 'short':
+                                print(f"   🎬 Processing short video ({duration:.1f}s)...")
+                                analysis = self.process_short_video(vid['url'], duration, item.caption or '')
+                            else:
+                                print(f"   🎬 Processing long video ({duration/60:.1f}min)...")
+                                analysis = self.process_long_video(vid['url'], duration, item.caption or '')
+                            
+                            if 'summary' in analysis:
+                                analysis_parts.append(f"[Video]: {analysis['summary']}")
+                            stats['videos'] += 1
                 
                 # Update item with analysis
                 if analysis_parts:
-                    item.media_analysis = "\n\n".join(analysis_parts)
+                    if item.media_analysis:
+                        item.media_analysis += "\n\n" + "\n\n".join(analysis_parts)
+                    else:
+                        item.media_analysis = "\n\n".join(analysis_parts)
                     stats['processed'] += 1
                     
             except Exception as e:
@@ -656,16 +672,13 @@ This is a raw backup. Processed version with AI insights is in wiki/summaries/.
 
             print(f"\n📌 Processing @{creator}: {text[:60]}...")
 
-            # Detect and fetch URLs
+            # Detect URLs (don't fetch external content yet - will do in batch)
             urls = self.detect_urls(text)
             all_urls = urls['external'] + urls['other'] + urls['youtube']
             has_x_article = len(urls['x_articles']) > 0
-            has_external = len(all_urls) > 0
             
-            # Fetch external content
+            # External content will be fetched in batch processing phase
             external_content = []
-            if has_external:
-                external_content = self.fetch_external_content(all_urls)
             
             # Classify media only (don't process yet - will do in batches)
             media_results = self.classify_media_only(tweet, data)
